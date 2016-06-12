@@ -16,6 +16,7 @@ CREATE TABLE user (
   name VARCHAR(255) NOT NULL DEFAULT '',
   email VARCHAR(128) NOT NULL,
   isInternal BOOLEAN NOT NULL DEFAULT false,
+  isEnabled BOOLEAN NOT NULL DEFAULT true,
   created TIMESTAMP NOT NULL DEFAULT NOW(),
   UNIQUE(email)
 );
@@ -24,7 +25,7 @@ CREATE TABLE user (
 # Big Popa is our system user.
 # --------------------------------------------
 INSERT INTO user VALUES (
-  10, '[BIGPOPA]', 'bigpopa_internal@transact.com', true, NULL
+  10, '[BIGPOPA]', 'bigpopa_internal@transact.com', true, true, NULL
 );
 
 # --------------------------------------------

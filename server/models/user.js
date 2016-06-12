@@ -2,6 +2,7 @@
 
 const Db = require('../database')
 const Joi = require('joi')
+const Boom = require('boom')
 
 const validate = require('./validate')
 
@@ -28,6 +29,18 @@ function deleteById (id) {
 
 function getById (id) {
   return Db.findOne('SELECT * FROM user WHERE id = ?', [id])
+}
+
+function isValid (id) {
+  return getById(id).tap((user) => {
+    if (!user) {
+      throw Boom.badRequest('User account does not exist.')
+    }
+    if (!user.isEnabled) {
+      throw Boom.badRequest('User account is temporarily suspended.')
+    }
+    return true
+  })
 }
 
 function getByEmail (email) {
@@ -57,5 +70,6 @@ module.exports = {
   create,
   setPassword,
   getPassword,
-  deleteInvalidPasswords
+  deleteInvalidPasswords,
+  isValid
 }

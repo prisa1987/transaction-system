@@ -19,7 +19,11 @@ const TXN_TYPE_TEST = 1000
 const _account = Joi.object().keys({
   userId: Joi.string().min(1).required(),
   type: Joi.number().integer().positive().required(),
-  name: Joi.string().min(2).required()
+  name: Joi.string().min(2),
+  // TODO: Add more currencies
+  currency: Joi.string().allow(
+    ['USD', 'THB']
+  )
 })
 
 function deleteAll () {
@@ -35,7 +39,7 @@ function deleteById (id) {
 }
 
 function getByUserIdAndCurrency (userId, currency) {
-  return Db.findOne('SELECT * FROM account WHERE userId = ? AND currency = ?', [userId, currency])
+  return Db.query('SELECT * FROM account WHERE userId = ? AND currency = ?', [userId, currency])
 }
 
 function getById (id) {

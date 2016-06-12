@@ -27,6 +27,11 @@ function createToken (user) {
   return Jwt.createToken({ id: user.id })
 }
 
+function ensureUserIsValid (userId) {
+  T.String(userId)
+  return User.isValid(userId)
+}
+
 const authenticate = P.coroutine(function * (email, plainTextPassword) {
   T.String(email)
   T.String(plainTextPassword)
@@ -55,5 +60,6 @@ const authenticate = P.coroutine(function * (email, plainTextPassword) {
 
 module.exports = {
   create,
-  authenticate
+  authenticate,
+  ensureUserIsValid
 }

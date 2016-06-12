@@ -3,10 +3,12 @@
 const Hapi = require('hapi')
 const Hoek = require('hoek')
 const Fs = require('fs')
+const P = require('bluebird')
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 Hoek.assert(process.env.TRANSACT_HOST, 'Missing env `TRANSACT_HOST`')
+
 if (IS_PRODUCTION) {
   Hoek.assert(process.env.TRANSACT_TLS_CERT, 'Missing env `TRANSACT_TLS_CERT`')
   Hoek.assert(process.env.TRANSACT_TLS_PRIVKEY, 'Missing env `TRANSACT_TLS_PRIVKEY`')
@@ -22,7 +24,7 @@ Db.query('SELECT NOW() as nowgdamitnow').then((rows) => (
   console.log('MySQL select now test ok:', rows[0].nowgdamitnow)
 ))
 
-createServer()
+module.exports = createServer()
 
 function createServer () {
   const server = new Hapi.Server()
@@ -33,7 +35,7 @@ function createServer () {
 
   server.connection({
     host: process.env.TRANSACT_HOST,
-    port: 3991,
+    port: process.env.TRANSACT_PORT || 3991,
     tls
   })
 
@@ -41,6 +43,8 @@ function createServer () {
     setupRoutes(server)
     startServer(server)
   })
+
+  return server
 }
 
 function setupRoutes (server) {
@@ -116,21 +120,34 @@ function registerPlugins (server, done) {
 }
 
 function setupAuth (server) {
+  // Test overrides.
   const users = {
     '[TESTUSER]': 1
   }
+
+  const UserService = require('./services/user')
 
   server.auth.strategy('jwt', 'jwt', {
     key: process.env.TRANSACT_API_SECRET,
     // Custom token validation function.
     validateFunc: (decoded, request, callback) => {
       // Do your checks to see if the person is valid.
-      if (!users[decoded.id]) {
+      return P.try(() => {
+        if (users[decoded.id]) {
+          return true
+        }
+        return UserService.ensureUserIsValid(decoded.id)
+      })
+      .then(() => {
+        // Passed ok.
+        console.error('Auth successful: User id', decoded.id)
+        callback(null, true)
+      })
+      .catch(() => {
         // Failed !
-        return callback(null, false)
-      }
-      // Passed ok.
-      callback(null, true)
+        console.error('Auth failed: Could not find user id', decoded.id)
+        callback(null, false)
+      })
     },
     verifyOptions: { algorithms: Jwt.JWT_ALG }
   })
@@ -163,10 +180,13 @@ function setupAuth (server) {
 }
 
 function startServer (server) {
-  server.start((err) => {
-    if (err) {
-      throw err
-    }
-    console.log('Server running at:', server.info.uri)
-  })
+  // Start only if run directly.
+  if (require.main === module) {
+    server.start((err) => {
+      if (err) {
+        throw err
+      }
+      console.log('Server running at:', server.info.uri)
+    })
+  }
 }

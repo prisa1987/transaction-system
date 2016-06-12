@@ -26,7 +26,8 @@ lab.experiment('Accounts', () => {
   lab.test('user1 creates an account', () => {
     return AccountService.create({
       name: 'test.test',
-      userId: context.user1.id
+      userId: context.user1.id,
+      currency: 'USD'
     })
     .then((account) => {
       Code.expect(account.id).to.be.above(9999)
@@ -43,12 +44,12 @@ lab.experiment('Accounts', () => {
       transactionType: Account.TXN_TYPE_TEST
     })
     .tap((result) => Code.expect(result).to.be.true())
-    .then(() => AccountService.getAccountForUser(context.user1.id, 'USD'))
-    .tap((account) => {
-      Code.expect(account.balance).to.equal('1000')
-      Code.expect(account.currency).to.equal('USD')
+    .then(() => AccountService.getAccountsForUser(context.user1.id, 'USD'))
+    .tap((accounts) => {
+      Code.expect(accounts[0].balance).to.equal('1000')
+      Code.expect(accounts[0].currency).to.equal('USD')
     })
-    .then((account) => AccountService.getTransactionHistory(account.id))
+    .then((accounts) => AccountService.getTransactionHistory(accounts[0].id))
     .tap((history) => {
       Code.expect(history.length).to.equal(1)
       Code.expect(history[0].fromAccountId).to.equal(Account.ACCOUNT_HOUSE)
@@ -61,7 +62,8 @@ lab.experiment('Accounts', () => {
   lab.test('user2 creates an account', () => {
     return AccountService.create({
       name: 'test.test',
-      userId: context.user2.id
+      userId: context.user2.id,
+      currency: 'USD'
     })
     .then((account) => {
       Code.expect(account.id).to.be.above(9999)
@@ -79,10 +81,10 @@ lab.experiment('Accounts', () => {
       transactionType: Account.TXN_TYPE_TEST
     })
     .tap((result) => Code.expect(result).to.be.true())
-    .then(() => AccountService.getAccountForUser(context.user1.id, 'USD'))
-    .tap((account) => {
-      Code.expect(account.balance).to.equal('800')
-      Code.expect(account.currency).to.equal('USD')
+    .then(() => AccountService.getAccountsForUser(context.user1.id, 'USD'))
+    .tap((accounts) => {
+      Code.expect(accounts[0].balance).to.equal('800')
+      Code.expect(accounts[0].currency).to.equal('USD')
     })
     .then(() => AccountService.getTransactionHistory(account2.id))
     .tap((history) => {
@@ -131,10 +133,10 @@ lab.experiment('Accounts', () => {
 
     return P.all(promises)
     .tap((result) => Code.expect(result.filter((x) => x === true).length).to.equal(200))
-    .then(() => AccountService.getAccountForUser(context.user1.id, 'USD'))
-    .tap((account) => {
-      Code.expect(account.balance).to.equal('800')
-      Code.expect(account.currency).to.equal('USD')
+    .then(() => AccountService.getAccountsForUser(context.user1.id, 'USD'))
+    .tap((accounts) => {
+      Code.expect(accounts[0].balance).to.equal('800')
+      Code.expect(accounts[0].currency).to.equal('USD')
     })
     .then(() => AccountService.getTransactionHistory(account2.id, 300))
     .tap((history) => {
