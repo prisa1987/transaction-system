@@ -1,6 +1,6 @@
 {
   "name": "transaction-system",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A simple transaction / accounting API based on Hapi and MySQL.",
   "main": "server/index.js",
   "repository": "git@github.com:anrid/transaction-system.git",
@@ -35,7 +35,13 @@
     "test": "lab -v -C test/*"
   },
   "keywords": [
-    "transaction", "transaction system", "txn", "accounting", "debit", "credit", "api"
+    "transaction",
+    "transaction system",
+    "txn",
+    "accounting",
+    "debit",
+    "credit",
+    "api"
   ],
   "author": "Anri Digholm",
   "license": "ISC"
