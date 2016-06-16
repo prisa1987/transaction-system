@@ -43,8 +43,7 @@ npm start
 # Curl FTW.
 
 # Create user `Ace` with email `ace@base.se`
-curl -X POST -d 'name=Ace&email=ace@base.se' \
-http://dev.api.com:3991/api/user
+curl -X POST -d 'name=Ace&email=ace@base.se' http://dev.api.com:3991/api/user
 
 # Response
 {
@@ -62,9 +61,30 @@ http://dev.api.com:3991/api/user
 
 ```bash
 # Authenticate user using email and password
-curl -X POST -d 'email=ace@base.se&password=ryHD1BYN' \
-http://dev.api.com:3991/api/auth
+curl -X POST -d 'email=ace@base.se&password=ryHD1BYN' http://dev.api.com:3991/api/auth
 
 # Response
-{ "token":"eyJhbGci...(very long token omitted)...xXx" }
+{ "token":"eyJhbGci..." }
+```
+
+### 3. Create an account for a given currency.
+
+```bash
+# NOTE: Requires an access token.
+# Choose a currency like USD, SEK etc.
+curl -H 'Authorization: eyJhbGci...' -X POST -d 'currency=USD' http://dev.api.com:3991/api/account
+
+# Response
+{
+  "account":{
+    "id":"10092",
+    "userId":"17",
+    "name":"USD_1",
+    "type":1,
+    "isInternal":0,
+    "created":"2016-06-11T09:54:52.000Z",
+    "balance":"0",
+    "currency":"USD"
+  }
+}
 ```

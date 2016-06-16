@@ -1,5 +1,6 @@
 'use strict'
 
+const P = require('bluebird')
 const Joi = require('joi')
 
 const UserService = require('./services/user')
@@ -8,7 +9,7 @@ const validate = require('./models/validate')
 
 function createHandler (func) {
   return (request, reply) => {
-    return func(request, reply)
+    return P.try(() => func(request, reply))
     .catch((reason) => {
       // Show fewer errors while testing.
       if (process.env.NODE_ENV === 'test') {

@@ -106,7 +106,6 @@ lab.experiment('REST API', () => {
       url: '/api/account',
       headers: { 'authorization': user1.token },
       payload: {
-        userId: user1.id,
         currency: 'USD'
       }
     }, (res) => {
