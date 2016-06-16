@@ -26,9 +26,8 @@ lab.experiment('Accounts', () => {
   lab.test('user1 creates an account', () => {
     return AccountService.create({
       name: 'test.test',
-      userId: context.user1.id,
       currency: 'USD'
-    })
+    }, context.user1.id)
     .then((account) => {
       Code.expect(account.id).to.be.above(9999)
       Code.expect(account.userId).to.equal(context.user1.id)
@@ -39,7 +38,7 @@ lab.experiment('Accounts', () => {
   lab.test('user1 deposits $10 USD', () => {
     return AccountService.deposit({
       accountId: account1.id,
-      amount: 1000, // Deposit $10 USD (1,000 US Cents)
+      amount: '1000', // Deposit $10 USD (1,000 US Cents)
       currency: 'USD',
       transactionType: Account.TXN_TYPE_TEST
     })
@@ -62,9 +61,8 @@ lab.experiment('Accounts', () => {
   lab.test('user2 creates an account', () => {
     return AccountService.create({
       name: 'test.test',
-      userId: context.user2.id,
       currency: 'USD'
-    })
+    }, context.user2.id)
     .then((account) => {
       Code.expect(account.id).to.be.above(9999)
       Code.expect(account.userId).to.equal(context.user2.id)
@@ -76,10 +74,10 @@ lab.experiment('Accounts', () => {
     return AccountService.transfer({
       fromAccountId: account1.id,
       toAccountId: account2.id,
-      amount: 200, // Deposit $2 USD (200 US Cents)
+      amount: '200', // Deposit $2 USD (200 US Cents)
       currency: 'USD',
       transactionType: Account.TXN_TYPE_TEST
-    })
+    }, context.user1.id)
     .tap((result) => Code.expect(result).to.be.true())
     .then(() => AccountService.getAccountsForUser(context.user1.id, 'USD'))
     .tap((accounts) => {
@@ -100,10 +98,10 @@ lab.experiment('Accounts', () => {
     return AccountService.transfer({
       fromAccountId: account1.id,
       toAccountId: account2.id,
-      amount: 900, // Deposit $2 USD (200 US Cents)
+      amount: '900', // Deposit $2 USD (200 US Cents)
       currency: 'USD',
       transactionType: Account.TXN_TYPE_TEST
-    })
+    }, context.user1.id)
     .tap((result) => Code.fail('Expected an exception!'))
     .catch((reason) => {
       Code.expect(reason.output.payload.message).to.include('Insufficient balance')
@@ -117,18 +115,18 @@ lab.experiment('Accounts', () => {
         AccountService.transfer({
           fromAccountId: account1.id,
           toAccountId: account2.id,
-          amount: 1, // $0.01
+          amount: '1', // $0.01
           currency: 'USD',
           transactionType: Account.TXN_TYPE_TEST
-        }))
+        }, context.user1.id))
       promises.push(
         AccountService.transfer({
           fromAccountId: account2.id,
           toAccountId: account1.id,
-          amount: 1, // $0.01
+          amount: '1', // $0.01
           currency: 'USD',
           transactionType: Account.TXN_TYPE_TEST
-        }))
+        }, context.user2.id))
     }
 
     return P.all(promises)

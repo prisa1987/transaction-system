@@ -22,7 +22,7 @@ const _account = Joi.object().keys({
   name: Joi.string().min(2),
   // TODO: Add more currencies
   currency: Joi.string().allow(
-    ['USD', 'THB']
+    ['USD', 'THB', 'SEK']
   )
 })
 
@@ -63,7 +63,7 @@ function _debitCredit (conn, opts) {
   return P.try(() => {
     T.String(opts.fromAccountId)
     T.String(opts.toAccountId)
-    T.Number(opts.amount)
+    T.String(opts.amount)
 
     return conn.queryAsync(
       'UPDATE account SET balance = balance - ? WHERE balance >= ? AND id = ?',

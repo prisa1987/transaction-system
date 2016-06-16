@@ -23,6 +23,9 @@ function createHandler (func) {
         }
       }
 
+      if (reason.message.indexOf('[tcomb]') !== -1) {
+        console.error(reason.stack)
+      }
       reply({ error: reason.message || 'server error' }).code(400)
     })
   }
@@ -58,7 +61,6 @@ function setupEndpoints (server) {
   })
 
   const createAccountSchema = Joi.object().keys({
-    userId: Joi.string().min(1).required(),
     currency: Joi.string().min(3).max(3).trim().uppercase().required()
   })
 
@@ -67,7 +69,26 @@ function setupEndpoints (server) {
     path: '/api/account',
     handler: createHandler((request, reply) => {
       const valid = validate(request.payload, createAccountSchema)
-      return AccountService.create(valid)
+      const actorId = request.auth.credentials.id
+      return AccountService.create(valid, actorId)
+      .then((account) => reply({ account }))
+    })
+  })
+
+  const transferSchema = Joi.object().keys({
+    fromAccountId: Joi.string().min(1).required(),
+    toAccountId: Joi.string().min(1).required(),
+    amount: Joi.string().min(1).required(),
+    currency: Joi.string().min(3).max(3).trim().uppercase().required()
+  })
+
+  server.route({
+    method: 'POST',
+    path: '/api/transfer',
+    handler: createHandler((request, reply) => {
+      const valid = validate(request.payload, transferSchema)
+      const actorId = request.auth.credentials.id
+      return AccountService.transfer(valid, actorId)
       .then((account) => reply({ account }))
     })
   })

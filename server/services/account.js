@@ -2,6 +2,7 @@
 
 const P = require('bluebird')
 const T = require('tcomb')
+const Boom = require('boom')
 
 const Account = require('../models/account')
 
@@ -13,27 +14,30 @@ function generateNewAccountName (userId, currency) {
   .then((existing) => `${currency}_${existing.length + 1}`)
 }
 
-const create = P.coroutine(function * (opts) {
-  T.String(opts.userId)
+const create = P.coroutine(function * (opts, actorId) {
   T.String(opts.currency)
-
-  // Type is hard-coded at this point.
-  opts.type = Account.TYPE_NORMAL
+  T.String(actorId)
 
   if (!opts.name) {
-    opts.name = yield generateNewAccountName(opts.userId, opts.currency)
+    opts.name = yield generateNewAccountName(actorId, opts.currency)
   }
 
-  const result = yield Account.create(opts)
-  const account = yield Account.getById(result.insertId)
+  const result = yield Account.create({
+    userId: actorId,
+    // Type is hard-coded at this point.
+    type: Account.TYPE_NORMAL,
+    name: opts.name,
+    currency: opts.currency
+  })
 
+  const account = yield Account.getById(result.insertId)
   return account
 })
 
 const deposit = P.coroutine(function * (opts) {
   T.String(opts.accountId)
   T.String(opts.currency)
-  T.Number(opts.amount)
+  T.String(opts.amount)
   return yield Account.deposit(opts)
 })
 
@@ -48,11 +52,27 @@ function getTransactionHistory (accountId, max = 10) {
   return Account.getTransactionHistory(accountId, max)
 }
 
-const transfer = P.coroutine(function * (opts) {
+function requireAccountAsOwner (accountId, userId) {
+  return Account.getById(accountId)
+  .tap((account) => {
+    if (!account) {
+      throw Boom.notFound()
+    }
+    if (account.userId !== userId) {
+      throw Boom.unauthorized()
+    }
+  })
+}
+
+const transfer = P.coroutine(function * (opts, actorId) {
   T.String(opts.fromAccountId)
   T.String(opts.toAccountId)
   T.String(opts.currency)
-  T.Number(opts.amount)
+  T.String(opts.amount)
+  T.String(actorId)
+
+  yield requireAccountAsOwner(opts.fromAccountId, actorId)
+
   return yield Account.transfer(opts)
 })
 
