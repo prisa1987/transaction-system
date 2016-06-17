@@ -88,3 +88,39 @@ curl -H 'Authorization: eyJhbGci...' -X POST -d 'currency=USD' http://dev.api.co
   }
 }
 ```
+
+### 4. Deposit funds.
+
+```bash
+node cli/admin.js --deposit --accountId 10092 --currency USD --amount 2000
+
+# Response
+Transaction: {
+  id: '3568',
+  fromAccountId: '101',   # System account.
+  toAccountId: '10092',
+  amount: '2000',         # Amount in US cents.
+  created: 2016-06-11T10:24:18.000Z,
+  type: 1                 # Real (non-test) transaction.
+}
+```
+
+### 5. Transfer funds.
+
+```bash
+# Transfer 1 US cent from one USD account to another.
+# NOTE: We assume that account 10093 was created previously.
+curl -H 'Authorization: eyJhbGci...' -X POST -d 'fromAccountId=10092&toAccountId=10093&amount=1&currency=USD' http://dev.api.com:3991/api/transfer
+
+# Response
+{
+  "transactionHistory": {
+    "id":"3792",
+    "fromAccountId":"10092",
+    "toAccountId":"10093",
+    "amount":"1",
+    "created":"2016-06-11T10:41:57.000Z",
+    "type":1
+  }
+}    
+```

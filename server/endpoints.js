@@ -90,7 +90,7 @@ function setupEndpoints (server) {
       const valid = validate(request.payload, transferSchema)
       const actorId = request.auth.credentials.id
       return AccountService.transfer(valid, actorId)
-      .then((account) => reply({ account }))
+      .then((transactionHistory) => reply({ transactionHistory }))
     })
   })
 }

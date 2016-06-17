@@ -16,12 +16,11 @@ if (IS_PRODUCTION) {
 
 // JWT Tokens.
 const Jwt = require('./jwt')
-Jwt.runTest()
 
 // Connect to MySQL.
 const Db = require('./database.js')
 Db.query('SELECT NOW() as nowgdamitnow').then((rows) => (
-  console.log('MySQL select now test ok:', rows[0].nowgdamitnow)
+  console.log('Database server time:', rows[0].nowgdamitnow)
 ))
 
 module.exports = createServer()

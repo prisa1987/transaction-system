@@ -42,7 +42,9 @@ lab.experiment('Accounts', () => {
       currency: 'USD',
       transactionType: Account.TXN_TYPE_TEST
     })
-    .tap((result) => Code.expect(result).to.be.true())
+    .tap((transactionHistory) => {
+      Code.expect(transactionHistory.amount).to.equal('1000')
+    })
     .then(() => AccountService.getAccountsForUser(context.user1.id, 'USD'))
     .tap((accounts) => {
       Code.expect(accounts[0].balance).to.equal('1000')
@@ -78,7 +80,7 @@ lab.experiment('Accounts', () => {
       currency: 'USD',
       transactionType: Account.TXN_TYPE_TEST
     }, context.user1.id)
-    .tap((result) => Code.expect(result).to.be.true())
+    .tap((transactionHistory) => Code.expect(transactionHistory.amount).to.equal('200'))
     .then(() => AccountService.getAccountsForUser(context.user1.id, 'USD'))
     .tap((accounts) => {
       Code.expect(accounts[0].balance).to.equal('800')
@@ -130,7 +132,7 @@ lab.experiment('Accounts', () => {
     }
 
     return P.all(promises)
-    .tap((result) => Code.expect(result.filter((x) => x === true).length).to.equal(200))
+    .tap((result) => Code.expect(result.filter((x) => x.amount === '1').length).to.equal(200))
     .then(() => AccountService.getAccountsForUser(context.user1.id, 'USD'))
     .tap((accounts) => {
       Code.expect(accounts[0].balance).to.equal('800')

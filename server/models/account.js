@@ -59,6 +59,10 @@ function getTransactionHistory (accountId, max) {
   )
 }
 
+function getTransactionHistoryById (id) {
+  return Db.findOne('SELECT * FROM transaction_log WHERE id = ?', [id])
+}
+
 function _debitCredit (conn, opts) {
   return P.try(() => {
     T.String(opts.fromAccountId)
@@ -94,12 +98,13 @@ function _debitCredit (conn, opts) {
       }
       return conn.queryAsync('INSERT INTO transaction_log SET ?', [txn])
     })
-    .tap((result) => {
+    .then((result) => {
       if (!result.insertId) {
         throw Boom.badRequest(
           `Failed to log transaction between accounts ${opts.fromAccountId} -> ${opts.toAccountId}. Amount = ${opts.amount}`
         )
       }
+      return result.insertId
     })
   })
 }
@@ -127,8 +132,10 @@ function _deposit (conn, opts) {
       amount: opts.amount,
       transactionType: opts.transactionType
     }))
-    .then(() => conn.commitAsync())
-    .then(() => true)
+    .then((transactionHistoryId) => {
+      return conn.commitAsync()
+      .then(() => transactionHistoryId)
+    })
   })
 }
 
@@ -162,8 +169,10 @@ function _transfer (conn, opts) {
           transactionType: opts.transactionType
         })
       })
-      .then(() => conn.commitAsync())
-      .then(() => true)
+      .then((transactionHistoryId) => (
+        conn.commitAsync()
+        .then(() => transactionHistoryId)
+      ))
     })
   })
 }
@@ -189,6 +198,7 @@ module.exports = {
   deposit,
   getByUserIdAndCurrency,
   getTransactionHistory,
+  getTransactionHistoryById,
 
   transfer
 }

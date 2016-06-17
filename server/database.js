@@ -48,14 +48,18 @@ const Db = {
     })
 
     return this._pool.getConnectionAsync()
-    .tap((conn) => console.log('Connected to MySQL:', conn.threadId))
+    .tap((conn) => console.log('Connected to MySQL #' + conn.threadId))
     .catch((reason) => console.error('Could not connect to MySQL:', reason))
+  },
+
+  close () {
+    setTimeout(() => this._pool.endAsync(), 500)
   },
 
   query (sql, params) {
     return this.connect().then((conn) => (
       conn.queryAsync(sql, params)
-      .tap(() => conn.release())
+      .finally(() => conn.release())
     ))
   },
 

@@ -38,7 +38,8 @@ const deposit = P.coroutine(function * (opts) {
   T.String(opts.accountId)
   T.String(opts.currency)
   T.String(opts.amount)
-  return yield Account.deposit(opts)
+  const transactionHistoryId = yield Account.deposit(opts)
+  return yield Account.getTransactionHistoryById(transactionHistoryId)
 })
 
 function getAccountsForUser (userId, currency) {
@@ -73,7 +74,8 @@ const transfer = P.coroutine(function * (opts, actorId) {
 
   yield requireAccountAsOwner(opts.fromAccountId, actorId)
 
-  return yield Account.transfer(opts)
+  const transactionHistoryId = yield Account.transfer(opts)
+  return yield Account.getTransactionHistoryById(transactionHistoryId)
 })
 
 module.exports = {
