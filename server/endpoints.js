@@ -14,6 +14,7 @@ function createHandler (func) {
       // Show fewer errors while testing.
       if (process.env.NODE_ENV === 'test') {
         console.error('Handler error:', reason.message)
+        // console.error('Handler error:', reason.stack)
       } else {
         // Keep validation errors compact.
         if (reason.name === 'ValidationError') {
@@ -91,6 +92,29 @@ function setupEndpoints (server) {
       const actorId = request.auth.credentials.id
       return AccountService.transfer(valid, actorId)
       .then((transactionHistory) => reply({ transactionHistory }))
+    })
+  })
+
+  server.route({
+    method: 'GET',
+    path: '/api/history/{accountId}',
+    handler: createHandler((request, reply) => {
+      const accountId = request.params.accountId
+      const max = request.query.max || 10
+      const actorId = request.auth.credentials.id
+      return AccountService.getTransactionHistoryForUser(accountId, max, actorId)
+      .then((transactionHistory) => reply({ transactionHistory }))
+    })
+  })
+
+  server.route({
+    method: 'GET',
+    path: '/api/account/{accountId}',
+    handler: createHandler((request, reply) => {
+      const accountId = request.params.accountId
+      const actorId = request.auth.credentials.id
+      return AccountService.requireAccountAsOwner(accountId, actorId)
+      .then((account) => reply({ account }))
     })
   })
 }

@@ -261,4 +261,35 @@ lab.experiment('REST API', () => {
       })
     })
   })
+
+  lab.test('user1 get his latest transaction history', (done) => {
+    server.inject({
+      method: 'GET',
+      url: '/api/history/' + user1.account1.id,
+      headers: { 'authorization': user1.token }
+    }, (res) => {
+      // console.log('res.result=', res.result)
+      const history = res.result.transactionHistory
+      Code.expect(history[0].toAccountId).to.equal(user2.account2.id)
+      Code.expect(history[0].amount).to.equal('25')
+      Code.expect(history[1].toAccountId).to.equal(user1.account2.id)
+      Code.expect(history[1].amount).to.equal('50')
+      done()
+    })
+  })
+
+  lab.test('user1 get his balance', (done) => {
+    server.inject({
+      method: 'GET',
+      url: '/api/account/' + user1.account1.id,
+      headers: { 'authorization': user1.token }
+    }, (res) => {
+      // console.log('res.result=', res.result)
+      const account = res.result.account
+      Code.expect(account.balance).to.equal('2425')
+      Code.expect(account.currency).to.equal('USD')
+      Code.expect(account.name).to.equal('USD_1')
+      done()
+    })
+  })
 })

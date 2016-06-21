@@ -124,3 +124,46 @@ curl -H 'Authorization: eyJhbGci...' -X POST -d 'fromAccountId=10092&toAccountId
   }
 }    
 ```
+
+### 6. Get transaction history.
+
+```bash
+# Fetch the 10 latest transaction history entries for account 10092
+curl -H 'Authorization: eyJhbGci...' -X GET http://dev.api.com:3991/api/history/10092
+
+# Fetch the 100 latest transaction history entries for account 10092
+curl -H 'Authorization: eyJhbGci...' -X GET http://dev.api.com:3991/api/history/10092?max=100
+
+# Response
+{
+  "transactionHistory": [{
+    "id":"3792",
+    "fromAccountId":"10092",
+    "toAccountId":"10093",
+    "amount":"1",
+    "created":"2016-06-11T10:41:57.000Z",
+    "type":1
+  },
+  { ... }],
+}    
+```
+
+### 7. Fetch account info, including current balance.
+
+```bash
+curl -H 'Authorization: eyJhbGci...' -X GET http://dev.api.com:3991/api/account/10092
+
+# Response
+{
+  "account":{
+    "id":"10092",
+    "userId":"17",
+    "name":"USD_1",
+    "type":1,
+    "isInternal":0,
+    "created":"2016-06-11T09:54:52.000Z",
+    "balance":"1999",
+    "currency":"USD"
+  }
+}
+```

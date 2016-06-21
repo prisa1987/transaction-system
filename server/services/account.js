@@ -65,6 +65,11 @@ function requireAccountAsOwner (accountId, userId) {
   })
 }
 
+function getTransactionHistoryForUser (accountId, max, userId) {
+  return requireAccountAsOwner(accountId, userId)
+  .then(() => getTransactionHistory(accountId, max))
+}
+
 const transfer = P.coroutine(function * (opts, actorId) {
   T.String(opts.fromAccountId)
   T.String(opts.toAccountId)
@@ -83,5 +88,7 @@ module.exports = {
   deposit,
   getAccountsForUser,
   getTransactionHistory,
+  getTransactionHistoryForUser,
+  requireAccountAsOwner,
   transfer
 }
