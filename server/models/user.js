@@ -8,7 +8,8 @@ const validate = require('./validate')
 
 const _user = Joi.object().keys({
   name: Joi.string().min(3).required(),
-  email: Joi.string().email().required()
+  email: Joi.string().email().required(),
+  profile: Joi.string()
 })
 
 function deleteInvalidPasswords () {
@@ -39,7 +40,12 @@ function isValid (id) {
     if (!user.isEnabled) {
       throw Boom.badRequest('User account is temporarily suspended.')
     }
-    return true
+  })
+  .then((user) => {
+    if (user.profile) {
+      user.profile = JSON.parse(user.profile)
+    }
+    return user
   })
 }
 

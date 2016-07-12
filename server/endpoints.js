@@ -46,6 +46,16 @@ function setupEndpoints (server) {
     })
   })
 
+  server.route({
+    method: 'GET',
+    path: '/api/user',
+    handler: createHandler((request, reply) => {
+      const actorId = request.auth.credentials.id
+      return UserService.requireValidUser(actorId)
+      .then((user) => reply({ user }))
+    })
+  })
+
   const getTokenSchema = Joi.object().keys({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required()
@@ -115,6 +125,21 @@ function setupEndpoints (server) {
       const actorId = request.auth.credentials.id
       return AccountService.requireAccountAsOwner(accountId, actorId)
       .then((account) => reply({ account }))
+    })
+  })
+
+  const facebookLoginSchema = Joi.object().keys({
+    accessToken: Joi.string().min(10).required()
+  })
+
+  server.route({
+    method: 'POST',
+    path: '/api/facebook-login',
+    config: { auth: false },
+    handler: createHandler((request, reply) => {
+      const valid = validate(request.payload, facebookLoginSchema)
+      return UserService.facebookLogin(valid.accessToken)
+      .then((token) => reply({ token }))
     })
   })
 }

@@ -82,6 +82,19 @@ lab.experiment('REST API', () => {
     })
   })
 
+  lab.test('user1 can be fetched', (done) => {
+    server.inject({
+      method: 'GET',
+      url: '/api/user',
+      headers: { 'authorization': user1.token }
+    }, (res) => {
+      // console.log('res.result=', res.result)
+      Code.expect(res.result.user.id).to.exist()
+      Code.expect(res.result.user.email).to.equal('ace@base.se')
+      done()
+    })
+  })
+
   lab.test('user1 creates a USD account', (done) => {
     server.inject({
       method: 'POST',

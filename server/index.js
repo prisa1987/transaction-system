@@ -135,7 +135,7 @@ function setupAuth (server) {
         if (users[decoded.id]) {
           return true
         }
-        return UserService.ensureUserIsValid(decoded.id)
+        return UserService.requireValidUser(decoded.id)
       })
       .then(() => {
         // Passed ok.
