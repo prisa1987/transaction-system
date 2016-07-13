@@ -80,14 +80,26 @@ const transfer = P.coroutine(function * (opts, actorId) {
 
   yield requireAccountAsOwner(opts.fromAccountId, actorId)
 
+  // Fetch target account.
+  const toAccount = yield Account.getById(opts.toAccountId)
+  if (!toAccount) {
+    throw Boom.notFound('Could not find target account')
+  }
+
   // Make the transfer.
   const transactionHistoryId = yield Account.transfer(opts)
 
   // Update transfer stats.
-  yield Stats.updateTransferStats(actorId, opts.toAccountId)
+  yield Stats.updateTransferStats(actorId, toAccount.id, toAccount.userId)
 
   // Return latest transaction history.
   return yield Account.getTransactionHistoryById(transactionHistoryId)
+})
+
+const getAll = P.coroutine(function * (actorId) {
+  T.String(actorId)
+  const accounts = yield Account.getByUserId(actorId)
+  return accounts
 })
 
 module.exports = {
@@ -97,5 +109,6 @@ module.exports = {
   getTransactionHistory,
   getTransactionHistoryForUser,
   requireAccountAsOwner,
-  transfer
+  transfer,
+  getAll
 }

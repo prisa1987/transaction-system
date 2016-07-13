@@ -9,6 +9,7 @@ const Db = require('./databaseHelper.js')
 const server = require('../server/index')
 
 const AccountService = require('../server/services/account')
+const UserService = require('../server/services/user')
 
 lab.experiment('REST API', () => {
   lab.before((done) => {
@@ -302,6 +303,112 @@ lab.experiment('REST API', () => {
       Code.expect(account.balance).to.equal('2425')
       Code.expect(account.currency).to.equal('USD')
       Code.expect(account.name).to.equal('USD_1')
+      done()
+    })
+  })
+
+  lab.test('user1 can list all his accounts', (done) => {
+    server.inject({
+      method: 'GET',
+      url: '/api/accounts',
+      headers: { 'authorization': user1.token }
+    }, (res) => {
+      // console.log('res.result=', res.result)
+      const accounts = res.result.accounts
+      Code.expect(accounts[0].name).to.equal('USD_1')
+      Code.expect(accounts[1].name).to.equal('USD_2')
+      Code.expect(accounts[1].userId).to.equal(user1.id)
+      done()
+    })
+  })
+
+  lab.test('user1 updates his profile', (done) => {
+    server.inject({
+      method: 'PATCH',
+      url: '/api/user/profile',
+      headers: { 'authorization': user1.token },
+      payload: {
+        first_name: 'Tasty',
+        last_name: 'Test',
+        settings: 'TESTING',
+        photo: 'tasty.jpg'
+      }
+    }, (res) => {
+      // console.log('res.result=', res.result)
+      Code.expect(res.result.ok).to.equal(1)
+      UserService.requireValidUser(user1.id)
+      .then((user) => {
+        // console.log('user=', user)
+        Code.expect(user.profile.first_name).to.equal('Tasty')
+        Code.expect(user.profile.photo).to.equal('tasty.jpg')
+        done()
+      })
+    })
+  })
+
+  lab.test('user1 updates his profile again', (done) => {
+    server.inject({
+      method: 'PATCH',
+      url: '/api/user/profile',
+      headers: { 'authorization': user1.token },
+      payload: {
+        first_name: 'Tasty!'
+      }
+    }, (res) => {
+      // console.log('res.result=', res.result)
+      Code.expect(res.result.ok).to.equal(1)
+      UserService.requireValidUser(user1.id)
+      .then((user) => {
+        // console.log('user=', user)
+        Code.expect(user.profile.first_name).to.equal('Tasty!')
+        Code.expect(user.profile.settings).to.equal('TESTING')
+        done()
+      })
+    })
+  })
+
+  lab.test('user1 searches for contacts', (done) => {
+    server.inject({
+      method: 'POST',
+      url: '/api/search/user',
+      headers: { 'authorization': user1.token },
+      payload: {
+        query: ''
+      }
+    }, (res) => {
+      // console.log('res.result=', res.result.result)
+      Code.expect(res.result.result.suggestions[0].name).to.equal('Kate Spade')
+      done()
+    })
+  })
+
+  lab.test('user1 searches for `Sp` and finds Kate Spade', (done) => {
+    server.inject({
+      method: 'POST',
+      url: '/api/search/user',
+      headers: { 'authorization': user1.token },
+      payload: {
+        query: 'Sp'
+      }
+    }, (res) => {
+      // console.log('res.result=', res.result.result)
+      Code.expect(res.result.result.users[0].name).to.equal('Kate Spade')
+      done()
+    })
+  })
+
+  lab.test('user1 searches for `Spz` and gets stuffed.', (done) => {
+    server.inject({
+      method: 'POST',
+      url: '/api/search/user',
+      headers: { 'authorization': user1.token },
+      payload: {
+        query: 'Spz'
+      }
+    }, (res) => {
+      // console.log('res.result=', res.result.result)
+      Code.expect(res.result.result.users.length).to.equal(0)
+      Code.expect(res.result.result.suggestions[0].name).to.equal('Kate Spade')
       done()
     })
   })

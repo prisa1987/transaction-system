@@ -7,23 +7,26 @@ const Boom = require('boom')
 const User = require('../models/user')
 const Crypt = require('../crypt')
 const Jwt = require('../jwt')
+const Stats = require('../models/stats')
+const Account = require('../models/account')
 
 const facebookLogin = P.coroutine(function * (accessToken) {
   const Graph = require('fbgraph')
   P.promisifyAll(Graph)
 
   const fields = 'email,name,picture,first_name,last_name'
-  const info = yield Graph.getAsync(`/me?$fields=${fields}&access_token=${accessToken}&version=v2.6`)
+  const info = yield Graph.getAsync(`/me?fields=${fields}&access_token=${accessToken}&version=v2.6`)
   if (!info || !info.email) {
     console.error('Auth failed. Missing email in user info.', info)
     throw Boom.badRequest('Missing email')
   }
   const email = info.email
 
-  if (!info.verified) {
-    console.error('Auth failed. Facebook account is unverified.', info)
-    throw Boom.badRequest('Unverified account')
-  }
+  // Skip this.
+  // if (!info.verified) {
+  //   console.error('Auth failed. Facebook account is unverified.', info)
+  //   throw Boom.badRequest('Unverified account')
+  // }
   if (!info.name && !info.first_name && !info.last_name) {
     console.error('Auth failed. Facebook account does not have a name.', info)
     throw Boom.badRequest('Account is missing name')
@@ -101,9 +104,84 @@ const authenticate = P.coroutine(function * (email, plainTextPassword) {
   return createToken(user)
 })
 
+function updateProfile (userId, data) {
+  T.String(userId)
+  T.Object(data)
+  return User.updateProfile(userId, data)
+}
+
+function getUserInfo (user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    first_name: user.profile && user.profile.first_name || '',
+    last_name: user.profile && user.profile.last_name || '',
+    picture: user.profile && user.profile.picture || ''
+  }
+}
+
+const search = P.coroutine(function * (userId, query) {
+  T.String(userId)
+
+  const st = yield Stats.getAll(userId)
+
+  let suggestions = []
+  if (st && st.stats && st.stats.transfers) {
+    // Fetch all account owners, excluding self.
+    const userIds = st.stats.transfers
+    .map((x) => x.userId)
+    .filter((x) => x !== userId)
+
+    if (userIds.length) {
+      const users = yield User.getByIds(userIds)
+      const userMap = users.reduce((acc, x) => {
+        acc[x.id] = x
+        return acc
+      }, { })
+      suggestions = userIds.map((x) => userMap[x])
+    }
+  }
+
+  // Show suggestions on empty query.
+  if (!query) {
+    return {
+      users: [],
+      suggestions
+    }
+  }
+
+  // Attempt direct match on email address.
+  if (query.indexOf('@') !== -1) {
+    const user = yield User.getByEmail(query)
+    if (user) {
+      return { users: [getUserInfo(user)] }
+    }
+  }
+
+  // Return an empty result there are no users in our stats.
+  if (!suggestions.length) {
+    return { users: [ ] }
+  }
+
+  // Rock a search.
+  const re = new RegExp('^' + query, 'i')
+  const filtered = suggestions.filter((user) => {
+    let parts = [ ...user.name.split(/\s+/), user.email ]
+    return parts.some((y) => re.test(y))
+  })
+
+  return {
+    users: filtered,
+    suggestions: !filtered.length ? suggestions : []
+  }
+})
+
 module.exports = {
   create,
   authenticate,
   requireValidUser,
-  facebookLogin
+  facebookLogin,
+  updateProfile,
+  search
 }

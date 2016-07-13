@@ -142,6 +142,50 @@ function setupEndpoints (server) {
       .then((token) => reply({ token }))
     })
   })
+
+  server.route({
+    method: 'GET',
+    path: '/api/accounts',
+    handler: createHandler((request, reply) => {
+      const actorId = request.auth.credentials.id
+      return AccountService.getAll(actorId)
+      .then((accounts) => reply({ accounts }))
+    })
+  })
+
+  const updateProfileSchema = Joi.object().keys({
+    first_name: Joi.string().max(128),
+    last_name: Joi.string().max(128),
+    photo: Joi.string().max(1024),
+    picture: Joi.string().max(1024),
+    settings: Joi.string().max(1024)
+  })
+
+  server.route({
+    method: 'PATCH',
+    path: '/api/user/profile',
+    handler: createHandler((request, reply) => {
+      const valid = validate(request.payload, updateProfileSchema)
+      const actorId = request.auth.credentials.id
+      return UserService.updateProfile(actorId, valid)
+      .then(() => reply({ ok: 1 }))
+    })
+  })
+
+  const searchSchema = Joi.object().keys({
+    query: Joi.string().allow('')
+  })
+
+  server.route({
+    method: 'POST',
+    path: '/api/search/user',
+    handler: createHandler((request, reply) => {
+      const valid = validate(request.payload, searchSchema)
+      const actorId = request.auth.credentials.id
+      return UserService.search(actorId, valid.query)
+      .then((result) => reply({ result }))
+    })
+  })
 }
 
 module.exports = setupEndpoints

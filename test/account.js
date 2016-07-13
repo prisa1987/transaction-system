@@ -187,6 +187,13 @@ lab.experiment('Accounts', () => {
     })
   })
 
+  lab.test('user1 can list all his accounts', () => {
+    return AccountService.getAll(context.user1.id)
+    .tap((accounts) => {
+      Code.expect(accounts.length).to.equal(1)
+    })
+  })
+
   lab.after((done) => {
     Db.printStats()
     done()

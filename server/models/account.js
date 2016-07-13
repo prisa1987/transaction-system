@@ -46,8 +46,16 @@ function getById (id) {
   return Db.findOne('SELECT * FROM account WHERE id = ?', [id])
 }
 
+function getByIds (accountIds) {
+  return Db.query('SELECT * FROM account WHERE id IN (?)', [accountIds])
+}
+
 function create (account) {
   return Db.query('INSERT INTO account SET ?', validate(account, _account))
+}
+
+function getByUserId (userId) {
+  return Db.query('SELECT * FROM account WHERE userId = ? ORDER BY id ASC', [userId])
 }
 
 function getTransactionHistory (accountId, max) {
@@ -191,12 +199,14 @@ module.exports = {
   TXN_TYPE_TEST,
 
   getById,
+  getByIds,
   deleteById,
   deleteAll,
   deleteTestTransactions,
   create,
   deposit,
   getByUserIdAndCurrency,
+  getByUserId,
   getTransactionHistory,
   getTransactionHistoryById,
 
