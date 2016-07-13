@@ -85,3 +85,6 @@ INSERT INTO transaction_log VALUES (
   1, 1, 100, 100000000000000, NULL, 10
 );
 UPDATE account SET balance = 100000000000000 WHERE id = 100;
+
+source 001.sql
+source 002.sql

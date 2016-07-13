@@ -8,6 +8,7 @@ const lab = exports.lab = Lab.script()
 const Db = require('./databaseHelper.js')
 const Account = require('../server/models/account')
 const AccountService = require('../server/services/account')
+const Stats = require('../server/models/stats')
 
 lab.experiment('Accounts', () => {
   let context
@@ -158,6 +159,31 @@ lab.experiment('Accounts', () => {
 
       Code.expect(fromUser1).to.equal(300)
       Code.expect(fromUser2).to.equal(100)
+    })
+  })
+
+  lab.test('transaction stats are kept', () => {
+    return P.all([
+      Stats.updateTransferStats(5, 666),
+      Stats.updateTransferStats(5, 666),
+      Stats.updateTransferStats(5, 666),
+      Stats.updateTransferStats(5, 666),
+      Stats.updateTransferStats(5, 667),
+      Stats.updateTransferStats(5, 667),
+      Stats.updateTransferStats(5, 667),
+      Stats.updateTransferStats(5, 668),
+      Stats.updateTransferStats(5, 668),
+      Stats.updateTransferStats(5, 669)
+    ])
+    .then(() => Stats.getAll(5))
+    .tap((stats) => {
+      // console.log('stats:', stats)
+      Code.expect(stats.stats.transfers[0].id).to.equal(666)
+      Code.expect(stats.stats.transfers[0].count).to.equal(4)
+      Code.expect(stats.stats.transfers[1].id).to.equal(667)
+      Code.expect(stats.stats.transfers[1].count).to.equal(3)
+      Code.expect(stats.stats.transfers[3].id).to.equal(669)
+      Code.expect(stats.stats.transfers[3].count).to.equal(1)
     })
   })
 

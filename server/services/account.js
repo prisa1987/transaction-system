@@ -5,6 +5,7 @@ const T = require('tcomb')
 const Boom = require('boom')
 
 const Account = require('../models/account')
+const Stats = require('../models/stats')
 
 // Generates an account name like 'CURRENCY_1' e.g.;
 // 'USD_1' if user no existing USD currency accounts.
@@ -79,7 +80,13 @@ const transfer = P.coroutine(function * (opts, actorId) {
 
   yield requireAccountAsOwner(opts.fromAccountId, actorId)
 
+  // Make the transfer.
   const transactionHistoryId = yield Account.transfer(opts)
+
+  // Update transfer stats.
+  yield Stats.updateTransferStats(actorId, opts.toAccountId)
+
+  // Return latest transaction history.
   return yield Account.getTransactionHistoryById(transactionHistoryId)
 })
 

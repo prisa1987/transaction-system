@@ -112,7 +112,7 @@ function _debitCredit (conn, opts) {
 function _deposit (conn, opts) {
   return P.try(() => {
     return conn.queryAsync(
-      'SELECT * FROM account WHERE id = ? AND currency = ?',
+      'SELECT * FROM account WHERE id = ? AND currency = ? FOR UPDATE',
       [opts.accountId, opts.currency]
     )
     .tap((targetAccount) => {
@@ -146,7 +146,7 @@ function deposit (opts) {
 function _transfer (conn, opts) {
   return P.try(() => {
     return conn.queryAsync(
-      'SELECT * FROM account WHERE id = ? AND currency = ?',
+      'SELECT * FROM account WHERE id = ? AND currency = ? FOR UPDATE',
       [opts.fromAccountId, opts.currency]
     )
     .then((fromAccount) => {
@@ -154,7 +154,7 @@ function _transfer (conn, opts) {
         throw Boom.notFound(`Could not find source account id ${opts.fromAccountId} currency ${opts.currency}`)
       }
       return conn.queryAsync(
-        'SELECT * FROM account WHERE id = ? AND currency = ?',
+        'SELECT * FROM account WHERE id = ? AND currency = ? FOR UPDATE',
         [opts.toAccountId, opts.currency]
       )
       .then((toAccount) => {

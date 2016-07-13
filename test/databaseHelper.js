@@ -8,6 +8,7 @@ const Db = require('../server/database')
 
 const User = require('../server/models/user')
 const Account = require('../server/models/account')
+const Stats = require('../server/models/stats')
 
 const UserService = require('../server/services/user')
 const AccountService = require('../server/services/account')
@@ -43,7 +44,8 @@ module.exports = {
     const removeTestData = P.all([
       User.deleteAll(),
       Account.deleteAll(),
-      Account.deleteTestTransactions()
+      Account.deleteTestTransactions(),
+      Stats.deleteTestStats()
     ])
     this.queue(() => removeTestData)
 
