@@ -167,3 +167,29 @@ curl -H 'Authorization: eyJhbGci...' -X GET http://dev.api.com:3991/api/account/
   }
 }
 ```
+
+## Additional API endpoints.
+
+```bash
+# List all accounts.
+curl -H 'Auth..' -X GET http://dev.api.com:3991/api/accounts
+
+# Update user profile.
+# Allowed fields;
+#   first_name: Joi.string().max(128),
+#   last_name: Joi.string().max(128),
+#   photo: Joi.string().max(1024),
+#   picture: Joi.string().max(1024),
+#   settings: Joi.string().max(1024)
+curl -H 'Auth..' -X PATCH -d 'first_name=Massa&last_name=Mun' \
+http://dev.api.com:3991/api/user/profile
+
+# Search for a user by exact email.
+curl -H 'Auth..' -X POST -d 'query=ace@base.se' \
+http://dev.api.com:3991/api/search/user
+
+# Search for a user whose first or last name begins with `Ma`,
+# among all users to which you’ve recently sent money.
+curl -H 'Auth..' -X POST -d 'query=Ma' \
+http://dev.api.com:3991/api/search/user
+```
