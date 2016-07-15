@@ -5,6 +5,7 @@ const Joi = require('joi')
 
 const UserService = require('./services/user')
 const AccountService = require('./services/account')
+const StarterService = require('./services/starter')
 const validate = require('./models/validate')
 
 function createHandler (func) {
@@ -42,7 +43,10 @@ function setupEndpoints (server) {
     config: { auth: false },
     handler: createHandler((request, reply) => {
       return UserService.create(request.payload)
-      .then((user) => reply({ user }))
+      .then((user) => reply({
+        user,
+        token: UserService.createToken(user)
+      }))
     })
   })
 
@@ -184,6 +188,27 @@ function setupEndpoints (server) {
       const actorId = request.auth.credentials.id
       return UserService.search(actorId, valid.query)
       .then((result) => reply({ result }))
+    })
+  })
+
+  server.route({
+    method: 'GET',
+    path: '/api/starter/{currency}',
+    handler: createHandler((request, reply) => {
+      const currency = request.params.currency
+      const actorId = request.auth.credentials.id
+      return StarterService.getStarter(actorId, currency)
+      .then((starter) => reply({ starter }))
+    })
+  })
+
+  server.route({
+    method: 'GET',
+    path: '/api/token',
+    handler: createHandler((request, reply) => {
+      const actorId = request.auth.credentials.id
+      return UserService.renewToken(actorId)
+      .then((token) => reply({ token }))
     })
   })
 }

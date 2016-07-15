@@ -54,6 +54,11 @@ function getTransactionHistory (accountId, max = 10) {
   return Account.getTransactionHistory(accountId, max)
 }
 
+function getTransactionHistoryForAccountOwner (userId, max = 10) {
+  T.String(userId)
+  return Account.getTransactionHistoryForAccountOwner(userId, max)
+}
+
 function requireAccountAsOwner (accountId, userId) {
   return Account.getById(accountId)
   .tap((account) => {
@@ -108,6 +113,7 @@ module.exports = {
   getAccountsForUser,
   getTransactionHistory,
   getTransactionHistoryForUser,
+  getTransactionHistoryForAccountOwner,
   requireAccountAsOwner,
   transfer,
   getAll

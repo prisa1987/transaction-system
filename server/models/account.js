@@ -67,6 +67,19 @@ function getTransactionHistory (accountId, max) {
   )
 }
 
+function getTransactionHistoryForAccountOwner (userId, max) {
+  return Db.query(`
+    SELECT * FROM transaction_log WHERE
+    (
+      (fromAccountId IN (SELECT id FROM account WHERE userId = ?))
+      OR
+      (toAccountId IN (SELECT id FROM account WHERE userId = ?))
+    )
+    ORDER BY id DESC LIMIT ?
+    `, [userId, userId, max]
+  )
+}
+
 function getTransactionHistoryById (id) {
   return Db.findOne('SELECT * FROM transaction_log WHERE id = ?', [id])
 }
@@ -209,6 +222,7 @@ module.exports = {
   getByUserId,
   getTransactionHistory,
   getTransactionHistoryById,
+  getTransactionHistoryForAccountOwner,
 
   transfer
 }

@@ -8,7 +8,6 @@ const User = require('../models/user')
 const Crypt = require('../crypt')
 const Jwt = require('../jwt')
 const Stats = require('../models/stats')
-const Account = require('../models/account')
 
 const facebookLogin = P.coroutine(function * (accessToken) {
   const Graph = require('fbgraph')
@@ -70,7 +69,10 @@ const create = P.coroutine(function * (data) {
 function createToken (user) {
   T.Object(user)
   T.String(user.id)
-  return Jwt.createToken({ id: user.id })
+  return Jwt.createToken({
+    id: user.id,
+    sid: Crypt.getSessionId()
+  })
 }
 
 function requireValidUser (userId) {
@@ -177,11 +179,19 @@ const search = P.coroutine(function * (userId, query) {
   }
 })
 
+function renewToken (userId) {
+  T.String(userId)
+  return User.isValid(userId)
+  .then(createToken)
+}
+
 module.exports = {
   create,
   authenticate,
   requireValidUser,
   facebookLogin,
   updateProfile,
-  search
+  search,
+  renewToken,
+  createToken
 }

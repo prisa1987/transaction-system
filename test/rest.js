@@ -18,6 +18,7 @@ lab.experiment('REST API', () => {
 
   let user1
   let user2
+  let user3
 
   lab.test('user1 fails to sign up by omitting a name', (done) => {
     server.inject({
@@ -397,7 +398,7 @@ lab.experiment('REST API', () => {
     })
   })
 
-  lab.test('user1 searches for `Spz` and gets stuffed.', (done) => {
+  lab.test('user1 searches for `Spz` and gets stuffed', (done) => {
     server.inject({
       method: 'POST',
       url: '/api/search/user',
@@ -409,6 +410,74 @@ lab.experiment('REST API', () => {
       // console.log('res.result=', res.result.result)
       Code.expect(res.result.result.users.length).to.equal(0)
       Code.expect(res.result.result.suggestions[0].name).to.equal('Kate Spade')
+      done()
+    })
+  })
+
+  lab.test('user1 get a starter', (done) => {
+    server.inject({
+      method: 'GET',
+      url: '/api/starter/THB',
+      headers: { 'authorization': user1.token }
+    }, (res) => {
+      // console.log('res.result=', res.result.starter)
+      const starter = res.result.starter
+      Code.expect(starter.user.id).to.equal(user1.id)
+      Code.expect(starter.accounts.length).to.equal(2)
+      Code.expect(starter.suggestions.length).to.equal(1)
+      Code.expect(starter.history.length).to.equal(3)
+      done()
+    })
+  })
+
+  lab.test('user3 signs up', (done) => {
+    server.inject({
+      method: 'POST',
+      url: '/api/user',
+      payload: {
+        name: 'Turbo',
+        email: 'turbo@base.se'
+      }
+    }, (res) => {
+      // console.log('res.result=', res.result)
+      Code.expect(res.result.user.email).to.equal('turbo@base.se')
+      user3 = res.result.user
+      user3.token = res.result.token
+      done()
+    })
+  })
+
+  lab.test('user3 get a starter', (done) => {
+    server.inject({
+      method: 'GET',
+      url: '/api/starter/THB',
+      headers: { 'authorization': user3.token }
+    }, (res) => {
+      // console.log('res.result=', res.result.starter)
+      const starter = res.result.starter
+      Code.expect(starter.user.id).to.equal(user3.id)
+
+      // Expects the starter to contain a THB account that was created
+      // on-the-fly as part of calling the /api/starter endpoint !
+      Code.expect(starter.accounts.length).to.equal(1)
+      Code.expect(starter.accounts[0].name).to.equal('THB_1')
+
+      Code.expect(starter.suggestions.length).to.equal(0)
+      Code.expect(starter.history.length).to.equal(0)
+      done()
+    })
+  })
+
+  lab.test('user3 renews his token', (done) => {
+    server.inject({
+      method: 'GET',
+      url: '/api/token',
+      headers: { 'authorization': user3.token }
+    }, (res) => {
+      // console.log('new: ', res.result.token)
+      // console.log('old: ', user3.token)
+      Code.expect(res.result.token).not.to.equal(user3.token)
+      Code.expect(res.result.token.length).to.equal(user3.token.length)
       done()
     })
   })

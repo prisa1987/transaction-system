@@ -8,6 +8,10 @@ const Shortid = require('shortid')
 
 P.promisifyAll(Scrypt)
 
+function getSessionId () {
+  return Date.now() + '_' + Crypto.randomBytes(8).toString('hex')
+}
+
 function createNewId () {
   return createPassword(String(Date.now()))
   .then(result => result.hash.substr(0, 24))
@@ -47,5 +51,6 @@ module.exports = {
   createPassword,
   verifyPassword,
   createNewId,
-  createRandomPassword
+  createRandomPassword,
+  getSessionId
 }

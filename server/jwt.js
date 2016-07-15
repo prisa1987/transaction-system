@@ -16,7 +16,7 @@ Hoek.assert(
 function createToken (payload) {
   T.Object(payload)
   const opts = {
-    expiresIn: '1h',
+    expiresIn: '30d',
     audience: JWT_AUDIENCE,
     issuer: JWT_ISSUER
   }
