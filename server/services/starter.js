@@ -6,6 +6,7 @@ const T = require('tcomb')
 const User = require('../models/user')
 
 const AccountService = require('./account')
+const Account = require('../models/account')
 const UserService = require('./user')
 
 const getStarter = P.coroutine(function * (userId, defaultCurrency) {
@@ -22,7 +23,8 @@ const getStarter = P.coroutine(function * (userId, defaultCurrency) {
   // using the default currency.
   if (!accounts.length) {
     const account = yield AccountService.create({
-      currency: defaultCurrency
+      currency: defaultCurrency,
+      type: Account.TYPE_MAIN
     }, userId)
     accounts = [account]
   }

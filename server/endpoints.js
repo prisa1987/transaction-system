@@ -109,6 +109,23 @@ function setupEndpoints (server) {
     })
   })
 
+  const transferByUserIdSchema = Joi.object().keys({
+    fromAccountId: Joi.string().min(1).required(),
+    toUserId: Joi.string().min(1).required(),
+    amount: Joi.string().min(1).required(),
+    currency: Joi.string().min(3).max(3).trim().uppercase().required()
+  })
+  server.route({
+    method: 'POST',
+    path: '/api/transferByUserId',
+    handler: createHandler((request, reply) => {
+      const valid = validate(request.payload, transferByUserIdSchema)
+      const actorId = request.auth.credentials.id
+      return AccountService.transferByUserId(valid, actorId)
+      .then((transactionHistory) => reply({ transactionHistory }))
+    })
+  })
+
   server.route({
     method: 'GET',
     path: '/api/history/{accountId}',
