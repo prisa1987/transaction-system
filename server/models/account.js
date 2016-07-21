@@ -8,6 +8,7 @@ const T = require('tcomb')
 
 const validate = require('./validate')
 
+const TYPE_MAIN = 11
 const TYPE_NORMAL = 1
 const TYPE_INTERNAL = 10
 const ACCOUNT_WORLD = '100'
@@ -56,6 +57,10 @@ function create (account) {
 
 function getByUserId (userId) {
   return Db.query('SELECT * FROM account WHERE userId = ? ORDER BY id ASC', [userId])
+}
+
+function getMainAccountByUserId(userId) {
+  return Db.findOne('SELECT * FROM account WHERE userId = ? AND type = ? ', [userId,TYPE_MAIN])
 }
 
 function getTransactionHistory (accountId, max) {
@@ -198,11 +203,49 @@ function _transfer (conn, opts) {
   })
 }
 
+function _transferByUserId (conn, opts) {
+  return P.try(() => {
+    return conn.queryAsync(
+      'SELECT * FROM account WHERE id = ? FOR UPDATE',
+      [opts.fromAccountId]
+    )
+    .then((fromAccount) => {
+      if (!fromAccount.length) {
+        throw Boom.notFound(`Could not find source account id ${opts.fromAccountId} currency ${opts.currency}`)
+      }
+      return conn.queryAsync(
+        'SELECT * FROM account WHERE userId = ? AND type = ? FOR UPDATE',
+        [opts.toUserId, TYPE_MAIN]
+      )
+      .then((toUserId) => {
+        if (!toUserId.length) {
+          throw Boom.notFound(`Could not find target user id ${opts.toUserId}`)
+        }
+
+        return _debitCredit(conn, {
+          fromAccountId: fromAccount[0].id,
+          toAccountId: toUserId[0].id,
+          amount: opts.amount,
+          transactionType: opts.transactionType
+        })
+      })
+      .then((transactionHistoryId) => (
+        conn.commitAsync()
+        .then(() => transactionHistoryId)
+      ))
+    })
+  })
+}
+
 function transfer (opts) {
   return Db.transaction((conn) => _transfer(conn, opts))
 }
 
+function transferByUserId(opts) {
+  return Db.transaction((conn) => _transferByUserId(conn, opts))
+}
 module.exports = {
+  TYPE_MAIN,
   TYPE_NORMAL,
   TYPE_INTERNAL,
   ACCOUNT_WORLD,
@@ -223,6 +266,7 @@ module.exports = {
   getTransactionHistory,
   getTransactionHistoryById,
   getTransactionHistoryForAccountOwner,
-
+  getMainAccountByUserId,
+  transferByUserId,
   transfer
 }
