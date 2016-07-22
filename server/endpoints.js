@@ -126,6 +126,23 @@ function setupEndpoints (server) {
     })
   })
 
+  const depositSchema= Joi.object().keys({
+    accountId: Joi.string().min(1).required(),
+    amount: Joi.string().min(1).required(),
+    currency: Joi.string().min(3).max(3).trim().uppercase().required()
+  })
+
+  server.route({
+    method: 'POST',
+    path: '/api/deposit',
+    handler: createHandler((request, reply) => {
+      const valid = validate(request.payload, depositSchema)
+      const actorId = request.auth.credentials.id
+      return AccountService.deposit(valid, actorId)
+      .then((transactionHistory) => reply({ transactionHistory }))
+    })
+  })
+
   server.route({
     method: 'GET',
     path: '/api/history/{accountId}',
