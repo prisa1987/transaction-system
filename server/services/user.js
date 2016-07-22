@@ -157,7 +157,7 @@ const search = P.coroutine(function * (userId, query) {
   if (query.indexOf('@') !== -1) {
     const user = yield User.getByEmail(query)
     if (user) {
-      return { users: [getUserInfo(user)] }
+      return { users: [user] }
     }
   }
 
