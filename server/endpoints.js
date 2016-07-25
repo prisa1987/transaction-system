@@ -161,8 +161,9 @@ function setupEndpoints (server) {
     handler: createHandler((request, reply) => {
       const accountId = request.params.accountId
       const max = request.query.max || 10
+      const userId = request.query.userId
       const actorId = request.auth.credentials.id
-      return AccountService.getTransactionHistoryForAccountOwnerWithDetail(actorId, max)
+      return AccountService.getTransactionHistoryForAccountOwnerWithDetail(actorId, max, userId)
       .then((transactionHistory) => reply({ transactionHistory }))
     })
   })

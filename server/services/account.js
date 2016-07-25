@@ -64,9 +64,9 @@ function getTransactionHistoryForAccountOwner (userId, max = 10) {
   return Account.getTransactionHistoryForAccountOwner(userId, max)
 }
 
-const getTransactionHistoryForAccountOwnerWithDetail =  P.coroutine(function * (userId, max=10) {
-  T.String(userId)
-  var transactions = yield Account.getTransactionHistoryForAccountOwnerWithDetail(userId, max)
+const getTransactionHistoryForAccountOwnerWithDetail =  P.coroutine(function * (actorId, max=10, userId) {
+  T.String(actorId)
+  var transactions = userId ? yield Account.getTransactionHistoryForAccountOwnerWithDetailByToUserId(actorId, userId, max): yield Account.getTransactionHistoryForAccountOwnerWithDetail(actorId, max)
   return transactions.map(function(t) {
     return {
        id: t.id,

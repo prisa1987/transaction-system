@@ -85,7 +85,7 @@ function getTransactionHistoryForAccountOwner (userId, max) {
   )
 } 
 
-function getTransactionHistoryForAccountOwnerWithDetail (userId, max) {
+function getTransactionHistoryForAccountOwnerWithDetail (actorId, max) {
   return Db.query(`
     SELECT t.id,t.description,t.status, t.amount,t.created,t.type,t.fromUserId,t.toUserId,
       uf.name AS fromUserName,uf.email AS fromUserEmail,uf.profile AS fromUserProfile,
@@ -100,7 +100,29 @@ function getTransactionHistoryForAccountOwnerWithDetail (userId, max) {
         ) t JOIN account af ON t.fromAccountId =af.id JOIN account at ON t.toAccountId = at.id
       ) t JOIN user uf ON t.fromUserId = uf.id JOIN user ut ON t.toUserId = ut.id 
     ORDER BY id DESC LIMIT ?
-    `, [userId, userId, max]
+    `, [actorId, actorId, max]
+  )
+} 
+
+function getTransactionHistoryForAccountOwnerWithDetailByToUserId (actorId, userId, max) {
+  return Db.query(`
+    SELECT t.id,t.description,t.status, t.amount,t.created,t.type,t.fromUserId,t.toUserId,
+      uf.name AS fromUserName,uf.email AS fromUserEmail,uf.profile AS fromUserProfile,
+      ut.name AS toUserName,ut.email AS toUserEmail,ut.profile AS toUserProfile FROM 
+      (SELECT t.id,t.description,t.status, t.amount,t.created,t.type,af.userId AS fromUserId,at.userId AS toUserId FROM
+        (SELECT * FROM transaction_log t WHERE
+          (
+            (
+              (fromAccountId IN (SELECT id FROM account WHERE userId = ?)) AND (toAccountId IN (SELECT id FROM account WHERE userId = ?))
+            ) OR
+            (
+              (fromAccountId IN (SELECT id FROM account WHERE userId = ?)) AND (toAccountId IN (SELECT id FROM account WHERE userId = ?))
+            )
+          )
+        ) t JOIN account af ON t.fromAccountId =af.id JOIN account at ON t.toAccountId = at.id
+      ) t JOIN user uf ON t.fromUserId = uf.id JOIN user ut ON t.toUserId = ut.id 
+    ORDER BY id DESC LIMIT ?
+    `, [actorId,userId, userId, actorId, max]
   )
 } 
 
@@ -286,6 +308,7 @@ module.exports = {
   getTransactionHistoryById,
   getTransactionHistoryForAccountOwner,
   getTransactionHistoryForAccountOwnerWithDetail,
+  getTransactionHistoryForAccountOwnerWithDetailByToUserId,
   getMainAccountByUserId,
   transferByUserId,
   transfer
