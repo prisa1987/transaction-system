@@ -1,0 +1,5 @@
+const TRANSACTION_STATUS = ["open","pending","rejected","completed"]
+
+module.exports = {
+	TRANSACTION_STATUS
+}

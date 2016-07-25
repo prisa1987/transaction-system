@@ -157,6 +157,18 @@ function setupEndpoints (server) {
 
   server.route({
     method: 'GET',
+    path: '/api/history/me',
+    handler: createHandler((request, reply) => {
+      const accountId = request.params.accountId
+      const max = request.query.max || 10
+      const actorId = request.auth.credentials.id
+      return AccountService.getTransactionHistoryForAccountOwnerWithDetail(actorId, max)
+      .then((transactionHistory) => reply({ transactionHistory }))
+    })
+  })
+
+  server.route({
+    method: 'GET',
     path: '/api/account/{accountId}',
     handler: createHandler((request, reply) => {
       const accountId = request.params.accountId

@@ -88,3 +88,4 @@ UPDATE account SET balance = 100000000000000 WHERE id = 100;
 
 source 001.sql
 source 002.sql
+source 003.sql

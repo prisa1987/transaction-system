@@ -6,6 +6,7 @@ const Boom = require('boom')
 
 const Account = require('../models/account')
 const Stats = require('../models/stats')
+const Constants = require('../constants')
 
 // Generates an account name like 'CURRENCY_1' e.g.;
 // 'USD_1' if user no existing USD currency accounts.
@@ -62,6 +63,35 @@ function getTransactionHistoryForAccountOwner (userId, max = 10) {
   T.String(userId)
   return Account.getTransactionHistoryForAccountOwner(userId, max)
 }
+
+const getTransactionHistoryForAccountOwnerWithDetail =  P.coroutine(function * (userId, max=10) {
+  T.String(userId)
+  var transactions = yield Account.getTransactionHistoryForAccountOwnerWithDetail(userId, max)
+  return transactions.map(function(t) {
+    return {
+       id: t.id,
+       description: t.description,
+       status: t.status,
+       amount: t.amount,
+       created: t.created,
+       type:t.type,
+       from: {
+          id: t.fromUserId,
+          name: t.fromUserName,
+          email: t.fromUserEmail,
+          profile: JSON.parse(t.fromUserProfile)
+       },
+       to: {
+          id: t.toUserId,
+          name: t.toUserName,
+          email: t.toUserEmail,
+          profile: JSON.parse(t.toUserProfile)
+       },
+       status: Constants.TRANSACTION_STATUS[t.status],
+       description: t.description
+    }
+  })
+})
 
 function requireAccountAsOwner (accountId, userId) {
   return Account.getById(accountId)
@@ -142,6 +172,7 @@ module.exports = {
   getTransactionHistory,
   getTransactionHistoryForUser,
   getTransactionHistoryForAccountOwner,
+  getTransactionHistoryForAccountOwnerWithDetail,
   requireAccountAsOwner,
   transfer,
   transferByUserId,
