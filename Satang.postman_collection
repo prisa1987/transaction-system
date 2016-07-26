@@ -1,0 +1,490 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Satang",
+		"_postman_id": "ffdd2347-ddf7-9de0-8ff8-fc4fcd5703e0",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"description": "",
+			"item": [
+				{
+					"name": "Create a user",
+					"request": {
+						"url": "{{url}}/user",
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Mr.Satang",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "email",
+									"value": "mr.satang@satang.io",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Authenticate and get an access token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": "var jsonObj = JSON.parse(responseBody);\npostman.setEnvironmentVariable(\"acces_token\", jsonObj[\"token\"]);"
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}/auth",
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "mr.satang@satang.io",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "password",
+									"value": "SybltHQD",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "FB Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": "var jsonObj = JSON.parse(responseBody);\npostman.setEnvironmentVariable(\"acces_token\", jsonObj[\"token\"]);"
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}/facebook-login",
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "accessToken",
+									"value": "EAAEAZADQtWA0BAIZC7arVb6M2DAeKhF5liVPaUhUYdpyK3XSiWHpAvTxHG2AyNMWCU5i0wD0yuB9b7Dd23ZBiZAaE5KcTRM0YGkWXEtszlxYSkBZCJwoZCIxzuArWZCEdCsPKpvaVeVWN1huyNZCTh8UJGuZAoOp1O5adwZBvhyFyu3PhTZBN3aYuKfy3XNOd3SXMfF9smGPUCeTe8nuqKLaZADf73ShKbZC0NNftsR1618j0ZAwZDZD",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Starter Pack",
+					"request": {
+						"url": "{{url}}/starter/THB",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Renew AcessToken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": "var jsonObj = JSON.parse(responseBody);\npostman.setEnvironmentVariable(\"acces_token\", jsonObj[\"token\"]);"
+							}
+						}
+					],
+					"request": {
+						"url": "{{url}}/token",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "accessToken",
+									"value": "EAAEAZADQtWA0BAIZC7arVb6M2DAeKhF5liVPaUhUYdpyK3XSiWHpAvTxHG2AyNMWCU5i0wD0yuB9b7Dd23ZBiZAaE5KcTRM0YGkWXEtszlxYSkBZCJwoZCIxzuArWZCEdCsPKpvaVeVWN1huyNZCTh8UJGuZAoOp1O5adwZBvhyFyu3PhTZBN3aYuKfy3XNOd3SXMfF9smGPUCeTe8nuqKLaZADf73ShKbZC0NNftsR1618j0ZAwZDZD",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Money Account",
+			"description": "",
+			"item": [
+				{
+					"name": "Create an account for a given currency",
+					"request": {
+						"url": "{{url}}/account",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "currency",
+									"value": "THB",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch money account info, including current balance",
+					"request": {
+						"url": "{{url}}/account/10000",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Get all accounts",
+					"request": {
+						"url": "{{url}}/accounts",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transaction",
+			"description": "",
+			"item": [
+				{
+					"name": "Transfer",
+					"request": {
+						"url": "{{url}}/transfer",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "fromAccountId",
+									"value": "10004",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "toAccountId",
+									"value": "10004",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "amount",
+									"value": "1",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "currency",
+									"value": "THB",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Deposit",
+					"request": {
+						"url": "{{url}}/deposit",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "accountId",
+									"value": "10004",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "amount",
+									"value": "1000",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "currencuy",
+									"value": "THB",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Transaction History",
+					"request": {
+						"url": "{{url}}/history/10000",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Transaction History Me",
+					"request": {
+						"url": "{{url}}/history/me?userId=21",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Request",
+					"request": {
+						"url": "{{url}}/requestByUserId",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "toUserId",
+									"value": "22",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "amount",
+									"value": "10000",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "currency",
+									"value": "THB",
+									"type": "text",
+									"enabled": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User's Profile",
+			"description": "",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"url": "{{url}}/user",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"url": "{{url}}/user/profile",
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\" : \"Dream\",\n    \"last_name\" : \"Hello\",\n    \"picture\" : \"http://img02.deviantart.net/c845/i/2013/295/6/4/cute_pikachu_by_ambro2013-d6rg5kh.jpg\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Utility",
+			"description": "",
+			"item": [
+				{
+					"name": "User Seach",
+					"request": {
+						"url": "{{url}}/search/user",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\" : \"samartz_lhxyqub_taskworldz@tfbnw.net\"\n}\n"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

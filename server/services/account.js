@@ -6,7 +6,6 @@ const Boom = require('boom')
 
 const Account = require('../models/account')
 const Stats = require('../models/stats')
-const Constants = require('../constants')
 
 // Generates an account name like 'CURRENCY_1' e.g.;
 // 'USD_1' if user no existing USD currency accounts.
@@ -87,7 +86,7 @@ const getTransactionHistoryForAccountOwnerWithDetail =  P.coroutine(function * (
           email: t.toUserEmail,
           profile: JSON.parse(t.toUserProfile)
        },
-       status: Constants.TRANSACTION_STATUS[t.status],
+       status: Account.TXN_STATUS[t.status],
        description: t.description
     }
   })
@@ -165,6 +164,22 @@ const getAll = P.coroutine(function * (actorId) {
   return accounts
 })
 
+const requestByUserId = P.coroutine(function * (opts, actorId) {
+  T.String(actorId)
+  T.String(opts.toUserId)
+  T.String(opts.currency)
+  T.String(opts.amount)
+  opts.fromUserId = actorId 
+
+  // Make the transfer.
+  const transactionHistoryId = yield Account.requestByUserId(opts)
+  // Update transfer stats. TODO 
+  // yield Stats.updateTransferStats(actorId, toAccount.id, toAccount.userId)
+
+  // Return latest transaction history.
+  return yield Account.getTransactionHistoryById(transactionHistoryId)
+})
+
 module.exports = {
   create,
   deposit,
@@ -176,5 +191,6 @@ module.exports = {
   requireAccountAsOwner,
   transfer,
   transferByUserId,
+  requestByUserId,
   getAll
 }

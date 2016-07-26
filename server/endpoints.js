@@ -126,6 +126,23 @@ function setupEndpoints (server) {
     })
   })
 
+  const requestByUserIdSchema = Joi.object().keys({
+    toUserId: Joi.string().min(1).required(),
+    amount: Joi.string().min(1).required(),
+    currency: Joi.string().min(3).max(3).trim().uppercase().required()
+  })
+  server.route({
+    method: 'POST',
+    path: '/api/requestByUserId',
+    handler: createHandler((request, reply) => {
+      const valid = validate(request.payload, requestByUserIdSchema)
+      const actorId = request.auth.credentials.id
+      return AccountService.requestByUserId(valid, actorId)
+      .then((transactionHistory) => reply({ transactionHistory }))
+    })
+  })
+
+
   const depositSchema= Joi.object().keys({
     accountId: Joi.string().min(1).required(),
     amount: Joi.string().min(1).required(),

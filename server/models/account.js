@@ -13,9 +13,12 @@ const TYPE_NORMAL = 1
 const TYPE_INTERNAL = 10
 const ACCOUNT_WORLD = '100'
 const ACCOUNT_HOUSE = '101'
-const TXN_TYPE_REAL = 1
+const TXN_TYPE_SEND = 1
+const TXN_TYPE_REQUEST = 2
 const TXN_TYPE_INTERNAL = 10
 const TXN_TYPE_TEST = 1000
+const TXN_STATUS = ["open","pending","rejected","completed"]
+
 
 const _account = Joi.object().keys({
   userId: Joi.string().min(1).required(),
@@ -161,7 +164,7 @@ function _debitCredit (conn, opts) {
         fromAccountId: opts.fromAccountId,
         toAccountId: opts.toAccountId,
         amount: opts.amount,
-        type: opts.transactionType || TXN_TYPE_REAL
+        type: opts.transactionType || TXN_TYPE_SEND
       }
       return conn.queryAsync('INSERT INTO transaction_log SET ?', [txn])
     })
@@ -278,6 +281,50 @@ function _transferByUserId (conn, opts) {
   })
 }
 
+function _requestByUserId (conn, opts) {
+  return P.try(() => {
+     return conn.queryAsync(
+      'SELECT * FROM account WHERE userId = ? AND type = ? FOR UPDATE',
+      [opts.fromUserId, TYPE_MAIN]
+    )
+    .then((fromAccount) => {
+      if (!fromAccount.length) {
+        throw Boom.notFound(`Could not find source account user id ${opts.fromUserId} currency ${opts.currency}`)
+      }
+      return conn.queryAsync(
+        'SELECT * FROM account WHERE userId = ? AND type = ? FOR UPDATE',
+        [opts.toUserId, TYPE_MAIN]
+      )
+      .then((toAccount) => {
+        if (!toAccount.length) {
+          throw Boom.notFound(`Could not find target user id ${opts.toUserId}`)
+        }
+        const txn = {
+            fromAccountId: fromAccount[0].id,
+            toAccountId: toAccount[0].id,
+            amount: parseInt(opts.amount),
+            type:  TXN_TYPE_REQUEST,
+            status: TXN_STATUS.indexOf("pending")
+        }
+        return conn.queryAsync('INSERT INTO transaction_log SET ?', [txn]) 
+      })
+      .then((result) => {
+        if (!result.insertId) {
+          throw Boom.badRequest(
+            `Failed to log transaction between accounts ${opts.fromAccountId} -> ${opts.toAccountId}. Amount = ${opts.amount}`
+          )
+        }
+        return result.insertId
+      })
+      .then((transactionHistoryId) => (
+        conn.commitAsync()
+        .then(() => transactionHistoryId)
+      ))
+    })
+ 
+  })
+}
+
 function transfer (opts) {
   return Db.transaction((conn) => _transfer(conn, opts))
 }
@@ -285,15 +332,22 @@ function transfer (opts) {
 function transferByUserId(opts) {
   return Db.transaction((conn) => _transferByUserId(conn, opts))
 }
+
+function requestByUserId(opts) {
+  return Db.transaction((conn) => _requestByUserId(conn,opts))
+}
+
 module.exports = {
   TYPE_MAIN,
   TYPE_NORMAL,
   TYPE_INTERNAL,
   ACCOUNT_WORLD,
   ACCOUNT_HOUSE,
-  TXN_TYPE_REAL,
+  TXN_TYPE_SEND,
+  TXN_TYPE_REQUEST,
   TXN_TYPE_INTERNAL,
   TXN_TYPE_TEST,
+  TXN_STATUS,
 
   getById,
   getByIds,
@@ -311,5 +365,6 @@ module.exports = {
   getTransactionHistoryForAccountOwnerWithDetailByToUserId,
   getMainAccountByUserId,
   transferByUserId,
-  transfer
+  transfer,
+  requestByUserId
 }
