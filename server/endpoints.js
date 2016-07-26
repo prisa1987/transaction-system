@@ -5,6 +5,7 @@ const Joi = require('joi')
 
 const UserService = require('./services/user')
 const AccountService = require('./services/account')
+const sofService = require('./services/source_of_fund')
 const StarterService = require('./services/starter')
 const validate = require('./models/validate')
 
@@ -88,6 +89,22 @@ function setupEndpoints (server) {
       const actorId = request.auth.credentials.id
       return AccountService.create(valid, actorId)
       .then((account) => reply({ account }))
+    })
+  })
+
+  const createBankSourceSchema = Joi.object().keys({
+    number: Joi.string().min(10).trim().required(),
+    issuer: Joi.string().min(3).trim().required()
+  })
+
+  server.route({
+    method: 'POST',
+    path: '/api/sof/bankaccount',
+    handler: createHandler((request, reply) => {
+      const valid = validate(request.payload, createBankSourceSchema)
+      const actorId = request.auth.credentials.id
+      return sofService.createBankAccountType(valid, actorId)
+      .then((source) => reply({ source }))
     })
   })
 

@@ -2,7 +2,7 @@
 	"variables": [],
 	"info": {
 		"name": "Satang",
-		"_postman_id": "ffdd2347-ddf7-9de0-8ff8-fc4fcd5703e0",
+		"_postman_id": "9464c964-78b9-6675-f6a4-0ceb8185964b",
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
@@ -228,6 +228,45 @@
 						"body": {
 							"mode": "formdata",
 							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Source Of Funds",
+			"description": "",
+			"item": [
+				{
+					"name": "Add bank account",
+					"request": {
+						"url": "{{url}}/sof/bankaccount",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{acces_token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "number",
+									"value": "0987654321",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "issuer",
+									"value": "SCB",
+									"type": "text",
+									"enabled": true
+								}
+							]
 						},
 						"description": ""
 					},

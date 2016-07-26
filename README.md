@@ -16,7 +16,7 @@ mysql -u root -p <your root pass> < ./sql/db.sql
 # Export everything
 set -a
 
-TRANSACT_HOST="dev.api.com"
+TRANSACT_HOST="localhost"
 TRANSACT_PORT=3991
 
 TRANSACT_API_SECRET="change-secret-to-something-better-68000"
