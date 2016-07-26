@@ -66,14 +66,17 @@ function getTransactionHistoryForAccountOwner (userId, max = 10) {
 const getTransactionHistoryForAccountOwnerWithDetail =  P.coroutine(function * (actorId, max=10, userId) {
   T.String(actorId)
   var transactions = userId ? yield Account.getTransactionHistoryForAccountOwnerWithDetailByToUserId(actorId, userId, max): yield Account.getTransactionHistoryForAccountOwnerWithDetail(actorId, max)
-  return transactions.map(function(t) {
-    return {
+  return transactions.map(_mapTransactionHistory)
+})
+
+function _mapTransactionHistory(t){
+  return {
        id: t.id,
        description: t.description,
        status: t.status,
        amount: t.amount,
        created: t.created,
-       type:t.type,
+       type: t.type,
        from: {
           id: t.fromUserId,
           name: t.fromUserName,
@@ -88,9 +91,8 @@ const getTransactionHistoryForAccountOwnerWithDetail =  P.coroutine(function * (
        },
        status: Account.TXN_STATUS[t.status],
        description: t.description
-    }
-  })
-})
+  }
+}
 
 function requireAccountAsOwner (accountId, userId) {
   return Account.getById(accountId)
@@ -155,7 +157,7 @@ const transferByUserId = P.coroutine(function * (opts, actorId) {
   yield Stats.updateTransferStats(actorId, toAccount.id, toAccount.userId)
 
   // Return latest transaction history.
-  return yield Account.getTransactionHistoryById(transactionHistoryId)
+  return yield Account.getTransactionHistoryWithDetailById(transactionHistoryId).then((history) => {return _mapTransactionHistory(history)})
 })
 
 const getAll = P.coroutine(function * (actorId) {
@@ -177,7 +179,7 @@ const requestByUserId = P.coroutine(function * (opts, actorId) {
   // yield Stats.updateTransferStats(actorId, toAccount.id, toAccount.userId)
 
   // Return latest transaction history.
-  return yield Account.getTransactionHistoryById(transactionHistoryId)
+  return yield Account.getTransactionHistoryWithDetailById(transactionHistoryId).then((history) => {return _mapTransactionHistory(history)})
 })
 
 module.exports = {

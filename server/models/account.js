@@ -19,7 +19,6 @@ const TXN_TYPE_INTERNAL = 10
 const TXN_TYPE_TEST = 1000
 const TXN_STATUS = ["open","pending","rejected","completed"]
 
-
 const _account = Joi.object().keys({
   userId: Joi.string().min(1).required(),
   type: Joi.number().integer().positive().required(),
@@ -131,6 +130,19 @@ function getTransactionHistoryForAccountOwnerWithDetailByToUserId (actorId, user
 
 function getTransactionHistoryById (id) {
   return Db.findOne('SELECT * FROM transaction_log WHERE id = ?', [id])
+}
+
+function getTransactionHistoryWithDetailById (id) {
+  return Db.findOne(`
+    SELECT t.id,t.description,t.status, t.amount,t.created,t.type,t.fromUserId,t.toUserId,
+      uf.name AS fromUserName,uf.email AS fromUserEmail,uf.profile AS fromUserProfile,
+      ut.name AS toUserName,ut.email AS toUserEmail,ut.profile AS toUserProfile FROM 
+      (SELECT t.id,t.description,t.status, t.amount,t.created,t.type,af.userId AS fromUserId,at.userId AS toUserId FROM
+        (SELECT * FROM transaction_log t WHERE id = ?
+        ) t JOIN account af ON t.fromAccountId =af.id JOIN account at ON t.toAccountId = at.id
+      ) t JOIN user uf ON t.fromUserId = uf.id JOIN user ut ON t.toUserId = ut.id 
+    `, [id]
+  )
 }
 
 function _debitCredit (conn, opts) {
@@ -360,6 +372,7 @@ module.exports = {
   getByUserId,
   getTransactionHistory,
   getTransactionHistoryById,
+  getTransactionHistoryWithDetailById,
   getTransactionHistoryForAccountOwner,
   getTransactionHistoryForAccountOwnerWithDetail,
   getTransactionHistoryForAccountOwnerWithDetailByToUserId,
