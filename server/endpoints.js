@@ -184,7 +184,7 @@ function setupEndpoints (server) {
     path: '/api/history/{accountId}',
     handler: createHandler((request, reply) => {
       const accountId = request.params.accountId
-      const max = request.query.max || 10
+      const max = parseInt(request.query.max) || 10
       const actorId = request.auth.credentials.id
       return AccountService.getTransactionHistoryForUser(accountId, max, actorId)
       .then((transactionHistory) => reply({ transactionHistory }))
@@ -196,7 +196,7 @@ function setupEndpoints (server) {
     path: '/api/history/me',
     handler: createHandler((request, reply) => {
       const accountId = request.params.accountId
-      const max = request.query.max || 10
+      const max = parseInt(request.query.max) || 10
       const userId = request.query.userId
       const actorId = request.auth.credentials.id
       return AccountService.getTransactionHistoryForAccountOwnerWithDetail(actorId, max, userId)
