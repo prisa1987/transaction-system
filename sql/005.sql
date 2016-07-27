@@ -1,0 +1,3 @@
+USE transact_dev;
+
+UPDATE `transact_dev`.`user` SET `name`='Satang Bot', `email`='bot@satang.com', `profile`='{\"picture\":\"https://tw-react-prod.s3.amazonaws.com/c86402f7-94e7-4c26-8a0e-aa17911a472e/Doggy.png?AWSAccessKeyId=AKIAJMVMLN4LBI4H7WPQ&Expires=1469604324&Signature=VVnI5XYdgCqK%2FkLft%2BNN7x9I9V0%3D&response-content-disposition=inline\",\"first_name\":\"Satang\",\"last_name\":\"Bot\",\"id\":\"0\"}' WHERE `id`='10';
