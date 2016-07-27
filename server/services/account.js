@@ -73,10 +73,9 @@ function _mapTransactionHistory(t){
   return {
        id: t.id,
        description: t.description,
-       status: t.status,
        amount: t.amount,
        created: t.created,
-       type: t.type,
+       type: Account.TXN_TYPE[t.type],
        from: {
           id: t.fromUserId,
           name: t.fromUserName,

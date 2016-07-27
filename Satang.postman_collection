@@ -2,7 +2,7 @@
 	"variables": [],
 	"info": {
 		"name": "Satang",
-		"_postman_id": "9464c964-78b9-6675-f6a4-0ceb8185964b",
+		"_postman_id": "4c75a430-37cd-b45c-df77-fff724b83516",
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
@@ -281,7 +281,7 @@
 				{
 					"name": "Transfer",
 					"request": {
-						"url": "{{url}}/transfer",
+						"url": "{{url}}/transferByUserId",
 						"method": "POST",
 						"header": [
 							{
@@ -300,8 +300,8 @@
 									"enabled": true
 								},
 								{
-									"key": "toAccountId",
-									"value": "10004",
+									"key": "toUserId",
+									"value": "x",
 									"type": "text",
 									"enabled": true
 								},
@@ -314,6 +314,12 @@
 								{
 									"key": "currency",
 									"value": "THB",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "description",
+									"value": "test",
 									"type": "text",
 									"enabled": true
 								}
@@ -351,7 +357,7 @@
 									"enabled": true
 								},
 								{
-									"key": "currencuy",
+									"key": "currency",
 									"value": "THB",
 									"type": "text",
 									"enabled": true
@@ -432,6 +438,12 @@
 								{
 									"key": "currency",
 									"value": "THB",
+									"type": "text",
+									"enabled": true
+								},
+								{
+									"key": "description",
+									"value": "test",
 									"type": "text",
 									"enabled": true
 								}

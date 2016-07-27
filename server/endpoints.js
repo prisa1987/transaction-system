@@ -130,7 +130,8 @@ function setupEndpoints (server) {
     fromAccountId: Joi.string().min(1).required(),
     toUserId: Joi.string().min(1).required(),
     amount: Joi.string().min(1).required(),
-    currency: Joi.string().min(3).max(3).trim().uppercase().required()
+    currency: Joi.string().min(3).max(3).trim().uppercase().required(),
+    description: Joi.string().trim().required()
   })
   server.route({
     method: 'POST',
@@ -146,7 +147,8 @@ function setupEndpoints (server) {
   const requestByUserIdSchema = Joi.object().keys({
     toUserId: Joi.string().min(1).required(),
     amount: Joi.string().min(1).required(),
-    currency: Joi.string().min(3).max(3).trim().uppercase().required()
+    currency: Joi.string().min(3).max(3).trim().uppercase().required(),
+    description: Joi.string().trim().required()
   })
   server.route({
     method: 'POST',

@@ -15,8 +15,9 @@ const ACCOUNT_WORLD = '100'
 const ACCOUNT_HOUSE = '101'
 const TXN_TYPE_SEND = 1
 const TXN_TYPE_REQUEST = 2
-const TXN_TYPE_INTERNAL = 10
+const TXN_TYPE_INTERNAL = 0
 const TXN_TYPE_TEST = 1000
+const TXN_TYPE = ["internal","send", "request"]
 const TXN_STATUS = ["open","pending","rejected","completed"]
 
 const _account = Joi.object().keys({
@@ -176,7 +177,8 @@ function _debitCredit (conn, opts) {
         fromAccountId: opts.fromAccountId,
         toAccountId: opts.toAccountId,
         amount: opts.amount,
-        type: opts.transactionType || TXN_TYPE_SEND
+        type: opts.transactionType || TXN_TYPE_SEND,
+        description: opts.description || ""
       }
       return conn.queryAsync('INSERT INTO transaction_log SET ?', [txn])
     })
@@ -282,7 +284,8 @@ function _transferByUserId (conn, opts) {
           fromAccountId: fromAccount[0].id,
           toAccountId: toUserId[0].id,
           amount: opts.amount,
-          transactionType: opts.transactionType
+          transactionType: opts.transactionType,
+          description: opts.description
         })
       })
       .then((transactionHistoryId) => (
@@ -315,8 +318,9 @@ function _requestByUserId (conn, opts) {
             fromAccountId: fromAccount[0].id,
             toAccountId: toAccount[0].id,
             amount: parseInt(opts.amount),
-            type:  TXN_TYPE_REQUEST,
-            status: TXN_STATUS.indexOf("pending")
+            type:  TXN_TYPE.indexOf("request"),
+            status: TXN_STATUS.indexOf("pending"),
+            description: opts.description || ""
         }
         return conn.queryAsync('INSERT INTO transaction_log SET ?', [txn]) 
       })
@@ -359,6 +363,7 @@ module.exports = {
   TXN_TYPE_REQUEST,
   TXN_TYPE_INTERNAL,
   TXN_TYPE_TEST,
+  TXN_TYPE,
   TXN_STATUS,
 
   getById,
