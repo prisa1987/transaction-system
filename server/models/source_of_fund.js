@@ -22,6 +22,10 @@ function getByUserId(id) {
   return Db.query('SELECT * FROM source_of_fund WHERE userId = ?', [id])
 }
 
+function getByUserIdAndType(id, type) {
+  return Db.query('SELECT * FROM source_of_fund WHERE userId = ? AND type = ?', [id, type])
+}
+
 function deleteById(id) {
   return Db.query('DELETE FROM source_of_fund WHERE id = ?', [id])
 }
@@ -36,6 +40,7 @@ module.exports = {
 
   getById,
   getByUserId,
+  getByUserIdAndType,
   deleteById,
   create
 

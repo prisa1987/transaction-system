@@ -108,6 +108,16 @@ function setupEndpoints (server) {
     })
   })
 
+  server.route({
+    method: 'GET',
+    path: '/api/sof/bankaccount',
+    handler: createHandler((request, reply) => {
+      const actorId = request.auth.credentials.id
+      return sofService.getAllBankAccount(actorId)
+      .then((sources) => reply({ sources }))
+    })
+  })
+
   const transferSchema = Joi.object().keys({
     fromAccountId: Joi.string().min(1).required(),
     toAccountId: Joi.string().min(1).required(),
